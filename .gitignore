@@ -1,0 +1,6 @@
+## mac files
+.DS_Store
+
+## any tests I do
+test*.py
+tmp*.py
