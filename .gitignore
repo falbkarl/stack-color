@@ -1,6 +1,9 @@
 ## mac files
 .DS_Store
 
+# venv
+.venv
+
 ## any tests I do
 test*.py
 tmp*.py
