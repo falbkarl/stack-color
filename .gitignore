@@ -7,3 +7,7 @@
 ## any tests I do
 test*.py
 tmp*.py
+
+# python files
+.pyc
+*/__pycache__
