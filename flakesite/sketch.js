@@ -71,6 +71,11 @@ function gamma(value) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  // width 587
+  // height 739
+  flake_x = (windowWidth-587)/2;
+  flake_y = (windowHeight-739)/2;
   
   // create sliders to serve as row and col selectors for our matrices
   // row is light color temp, col is flake thickness
