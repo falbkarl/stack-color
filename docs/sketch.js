@@ -13,8 +13,11 @@ let row_slider, col_slider, int_slider;
 let dropdown_flake;
 let dropdown_sio2;
 let thickness_max;
-let version = 'Flake Sim v1.2.0'
+let version = 'Flake Sim v1.2.1'
 let sidebar_width;
+
+document.body.style.overflow = "hidden"; // Disables scrolling completely
+
 
 function preload() {
   // load in our two sets of rgb values, graphite & h-BN
