@@ -14,10 +14,7 @@ let dropdown_flake;
 let dropdown_sio2;
 let thickness_max;
 let version = 'Flake Sim v1.0.0'
-
-// set offset for flake outline
-let flake_x = 300;
-let flake_y = 40;
+let sidebar_width;
 
 function preload() {
   // load in our two sets of rgb values, graphite & h-BN
@@ -71,17 +68,13 @@ function gamma(value) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // width 587
-  // height 739
-  flake_x = (windowWidth-587)/2;
-  flake_y = (windowHeight-739)/2;
   
   // create sliders to serve as row and col selectors for our matrices
   // row is light color temp, col is flake thickness
   // start with temporary maxes at 2, to be reset in setMatrices
   // (i don't know a better way to solve this problem)
   // intensity slider changes intensity level
+  sidebar_width = 200;
 
   // Slider(min, max, init_val, step)
   let slider_spacing = 50;
@@ -130,6 +123,7 @@ function setup() {
   dropdown_sio2.changed(onDropdownChange);
 
   // Create the shutdown button - CHATGPT generated pretty much
+  /*
   let shutdownButton = createButton("Quit");
   shutdownButton.position(int_slider.x + 10, 10);
   shutdownButton.mousePressed(() => {
@@ -141,10 +135,30 @@ function setup() {
       })
       .catch(err => console.error("Error shutting down:", err));
   });
+  */
 
 }
 
 function draw() {
+  // handle flake size
+  let flake_naive_w = 587;
+  let flake_naive_h = 739;
+  let flake_buffer = 0.05
+  // to scale the flake would be to take the ratio of the available width and height with the naive flake w and h
+  // and then see which one is smaller, then to scale, account for a 5% buffer on either side of flake
+  let flake_scale = min(windowHeight/flake_naive_h, (windowWidth - sidebar_width)/flake_naive_w) * (1-2*flake_buffer);
+  // see which dim is the limiting dim, and center the flake in the non-limiting dim
+  let height_limited = (windowHeight/flake_naive_h < (windowWidth - sidebar_width)/flake_naive_w);
+  let flake_buffer_x = flake_buffer;
+  let flake_buffer_y = flake_buffer;
+  if (height_limited) {
+    flake_buffer_x = ((windowWidth - sidebar_width) - flake_naive_w*flake_scale)/2/(windowWidth-sidebar_width);
+  } else {
+    flake_buffer_y = (windowHeight - flake_naive_h*flake_scale)/2/windowHeight;
+  }
+  let flake_x = sidebar_width + (windowWidth-sidebar_width)*flake_buffer_x;
+  let flake_y = windowHeight*flake_buffer_y;
+
   let row = row_slider.value();
   let col = col_slider.value();
   let int_index = int_slider.value();
@@ -184,28 +198,28 @@ function draw() {
   
   // define flake shape
   beginShape();
-  vertex(23 + flake_x, 80 + flake_y);
-  vertex(309 + flake_x, 0 + flake_y);
-  vertex(418 + flake_x, 27 + flake_y);
-  vertex(460 + flake_x, 82 + flake_y);
-  vertex(480 + flake_x, 149 + flake_y);
-  vertex(475 + flake_x, 168 + flake_y);
-  vertex(487 + flake_x, 200 + flake_y);
-  vertex(546 + flake_x, 248 + flake_y);
-  vertex(478 + flake_x, 528 + flake_y);
-  vertex(499 + flake_x, 601 + flake_y);
-  vertex(533 + flake_x, 611 + flake_y);
-  vertex(587 + flake_x, 663 + flake_y);
-  vertex(535 + flake_x, 698 + flake_y);
-  vertex(276 + flake_x, 739 + flake_y);
-  vertex(250 + flake_x, 710 + flake_y);
-  vertex(173 + flake_x, 692 + flake_y);
-  vertex(114 + flake_x, 635 + flake_y);
-  vertex(103 + flake_x, 541 + flake_y);
-  vertex(120 + flake_x, 511 + flake_y);
-  vertex(108 + flake_x, 416 + flake_y);
-  vertex(18 + flake_x, 148 + flake_y);
-  vertex(0 + flake_x, 139 + flake_y);
+  vertex(flake_scale*23 + flake_x, flake_scale*80 + flake_y);
+  vertex(flake_scale*309 + flake_x, flake_scale*0 + flake_y);
+  vertex(flake_scale*418 + flake_x, flake_scale*27 + flake_y);
+  vertex(flake_scale*460 + flake_x, flake_scale*82 + flake_y);
+  vertex(flake_scale*480 + flake_x, flake_scale*149 + flake_y);
+  vertex(flake_scale*475 + flake_x, flake_scale*168 + flake_y);
+  vertex(flake_scale*487 + flake_x, flake_scale*200 + flake_y);
+  vertex(flake_scale*546 + flake_x, flake_scale*248 + flake_y);
+  vertex(flake_scale*478 + flake_x, flake_scale*528 + flake_y);
+  vertex(flake_scale*499 + flake_x, flake_scale*601 + flake_y);
+  vertex(flake_scale*533 + flake_x, flake_scale*611 + flake_y);
+  vertex(flake_scale*587 + flake_x, flake_scale*663 + flake_y);
+  vertex(flake_scale*535 + flake_x, flake_scale*698 + flake_y);
+  vertex(flake_scale*276 + flake_x, flake_scale*739 + flake_y);
+  vertex(flake_scale*250 + flake_x, flake_scale*710 + flake_y);
+  vertex(flake_scale*173 + flake_x, flake_scale*692 + flake_y);
+  vertex(flake_scale*114 + flake_x, flake_scale*635 + flake_y);
+  vertex(flake_scale*103 + flake_x, flake_scale*541 + flake_y);
+  vertex(flake_scale*120 + flake_x, flake_scale*511 + flake_y);
+  vertex(flake_scale*108 + flake_x, flake_scale*416 + flake_y);
+  vertex(flake_scale*18 + flake_x, flake_scale*148 + flake_y);
+  vertex(flake_scale*0 + flake_x, flake_scale*139 + flake_y);
   endShape(CLOSE);
   
   // draw labels for the sliders
@@ -298,3 +312,5 @@ function onDropdownChange() {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
+
+// TODO prevent scrolling but allow slider movements
