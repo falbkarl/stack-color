@@ -13,14 +13,18 @@ let row_slider, col_slider, int_slider;
 let dropdown_flake;
 let dropdown_sio2;
 let thickness_max;
-let version = 'Flake Sim v1.2.1'
+let version = 'v1.3.0';
+let version_link;
 let sidebar_width;
 
-document.body.style.overflow = "hidden"; // Disables scrolling completely
+
+// disable scrolling (helps prevent issues on mobile)
+document.body.style.overflow = "hidden"; 
 
 
 function preload() {
-  // load in our two sets of rgb values, graphite & h-BN
+  // load in our sets of "uncropped linear RGB values"
+  // there's probably a better way to code this but I don't really know JS
   r_matrix_gr_0 = loadTable('./data/r_flake_gr_0.csv', 'csv', 'header=false');
   g_matrix_gr_0 = loadTable('./data/g_flake_gr_0.csv', 'csv', 'header=false');
   b_matrix_gr_0 = loadTable('./data/b_flake_gr_0.csv', 'csv', 'header=false');
@@ -58,43 +62,30 @@ function preload() {
   b_matrix_wse2_285 = loadTable('./data/b_flake_wse2_285.csv', 'csv', 'header=false');
 }
 
-function gamma(value) {
+function sRGB_conv(value) {
+  // takes "uncropped linear RGB values" and converts to sRGB
+  // apply gamma function 
   let post_gamma;
   if (value <= 0.0031308) {
     post_gamma = value * 12.92;
   } else {
     post_gamma = 1.055*Math.pow(value, 1/2.4) - 0.055
   }
+  // constrain to [0, 1], scale to [0, 255]
   return Math.round(constrain(post_gamma, 0, 1)*255);
 
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  
   // create sliders to serve as row and col selectors for our matrices
-  // row is light color temp, col is flake thickness
-  // start with temporary maxes at 2, to be reset in setMatrices
-  // (i don't know a better way to solve this problem)
-  // intensity slider changes intensity level
-
-  // Slider(min, max, init_val, step)
+  // row is light color temp, col is flake thickness, int is light intensity
+  // start with temporary maxes at 2, to be reset in setMatrices() (i don't know a better way to solve this problem)
   row_slider = createSlider(0, 2, 0, 1);
   col_slider = createSlider(0, 2, 0, 1);
   int_slider = createSlider(0, 50, 25, 1);
-
-  setMatrices('graphite', '90 nm');
-
-  row_slider.style('transform-origin', 'left top'); 
-  row_slider.style('transform', 'rotate(-90deg)');
   row_slider.class('slider')
-  
-  col_slider.style('transform-origin', 'left top'); 
-  col_slider.style('transform', 'rotate(-90deg)');
   col_slider.class('slider')
-
-  int_slider.style('transform-origin', 'left top'); 
-  int_slider.style('transform', 'rotate(-90deg)');
   int_slider.class('slider')
   
   // dropdown to select flakes
@@ -102,7 +93,6 @@ function setup() {
   dropdown_flake.option('graphite');
   dropdown_flake.option('h-BN');
   dropdown_flake.option('WSe2')
-  dropdown_flake.selected('graphite');
   dropdown_flake.changed(onDropdownChange);
 
   // dropdown to select sio2 thickness
@@ -110,17 +100,29 @@ function setup() {
   dropdown_sio2.option('0 nm')
   dropdown_sio2.option('90 nm');
   dropdown_sio2.option('285 nm');
-  dropdown_sio2.selected('90 nm');
   dropdown_sio2.changed(onDropdownChange);
+
+  // initial conditions
+  dropdown_flake.selected('graphite');
+  dropdown_sio2.selected('90 nm');
+  setMatrices(dropdown_flake.value(), dropdown_sio2.value());
+
+  // version link
+  version_link = createA('./info.pdf', version, '_blank');
+  version_link.position(20, 12);
+  version_link.style('font-family', 'Times New Roman');
+  version_link.style('font-size', '20px');
+  version_link.style('font-weight', 'bold');
+  version_link.style('color', 'blue');
+  version_link.style('text-decoration', 'none');
+  version_link.style('visited', 'color: blue');
 }
 
 function draw() {
-  // some general params
-  textFont('Times New Roman');
   // currently a dummy variable, does not affect elements in the sidebar
   sidebar_width = 200;
 
-  // handle flake size
+  // handle dynamic flake sizing
   let flake_naive_w = 587;
   let flake_naive_h = 739;
   let flake_buffer = 0.05
@@ -136,40 +138,45 @@ function draw() {
   } else {
     flake_buffer_y = (windowHeight - flake_naive_h*flake_scale)/2/windowHeight;
   }
+  // set flake position
   let flake_x = sidebar_width + (windowWidth-sidebar_width)*flake_buffer_x;
   let flake_y = windowHeight*flake_buffer_y;
 
   // slider positioning
-  let slider_spacing = 50;
-  row_slider.position(40, windowHeight - 120);
-  col_slider.position(40 + slider_spacing, windowHeight - 120);
-  int_slider.position(40 + 2*slider_spacing, windowHeight - 120);
+  let slider_spacing = sidebar_width / 4;
+  let lower_text_height = 120;
+  row_slider.position(slider_spacing - row_slider.height/2, windowHeight - lower_text_height);
+  col_slider.position(slider_spacing*2 - row_slider.height/2, windowHeight - lower_text_height);
+  int_slider.position(slider_spacing*3 - row_slider.height/2, windowHeight - lower_text_height);
 
-  let slider_height = (windowHeight - 120 - 180)
-
-  row_slider.style('width', `${slider_height}px`);
-  col_slider.style('width', `${slider_height}px`);
-  int_slider.style('width', `${slider_height}px`);
+  // slider scale
+  let upper_text_height = 180;
+  let slider_length = (windowHeight - lower_text_height - upper_text_height)
+  row_slider.style('width', `${slider_length}px`);
+  col_slider.style('width', `${slider_length}px`);
+  int_slider.style('width', `${slider_length}px`);
 
   // dropdown positioning
-  dropdown_flake.position(col_slider.x + 25, row_slider.y + 50);
-  dropdown_sio2.position(dropdown_flake.x, dropdown_flake.y + 25);
+  let dropdown_x = 115;
+  let dropdown_y = windowHeight - lower_text_height + 50;
+  dropdown_flake.position(dropdown_x, dropdown_y);
+  dropdown_sio2.position(dropdown_x, dropdown_y + 25);
 
+  // slider scale values
   let row = row_slider.value();
   let col = col_slider.value();
   let int_index = int_slider.value();
-
   let intensity = map(int_index, 0, 50, 0, 2);
 
   // get d=0 rgb values (substrate)
-  let r_sub = gamma(intensity*parseFloat(r_matrix.getString(row, 0)));
-  let g_sub = gamma(intensity*parseFloat(g_matrix.getString(row, 0)));
-  let b_sub = gamma(intensity*parseFloat(b_matrix.getString(row, 0)));
+  let r_sub = sRGB_conv(intensity*parseFloat(r_matrix.getString(row, 0)));
+  let g_sub = sRGB_conv(intensity*parseFloat(g_matrix.getString(row, 0)));
+  let b_sub = sRGB_conv(intensity*parseFloat(b_matrix.getString(row, 0)));
 
   // get (T, d) rgb values (flake)
-  let r_fl = gamma(intensity*parseFloat(r_matrix.getString(row, col)));
-  let g_fl = gamma(intensity*parseFloat(g_matrix.getString(row, col)));
-  let b_fl = gamma(intensity*parseFloat(b_matrix.getString(row, col)));
+  let r_fl = sRGB_conv(intensity*parseFloat(r_matrix.getString(row, col)));
+  let g_fl = sRGB_conv(intensity*parseFloat(g_matrix.getString(row, col)));
+  let b_fl = sRGB_conv(intensity*parseFloat(b_matrix.getString(row, col)));
 
   // set row & col slider to temp & thickness values
   // round thickness to nearest angstrom
@@ -186,11 +193,10 @@ function draw() {
   // set background in parameter region
   noStroke();
   fill(255, 255, 255);
-  rect(0, 0, int_slider.x + 60, height);
+  rect(0, 0, sidebar_width, height);
 
   // set fill color for making the flake
   fill(r_fl, g_fl, b_fl);
-  noStroke();
   
   // define flake shape
   beginShape();
@@ -218,33 +224,41 @@ function draw() {
   vertex(flake_scale*0 + flake_x, flake_scale*139 + flake_y);
   endShape(CLOSE);
   
-  // draw labels for the sliders
+  // text params
+  textFont('Times New Roman');
   fill(0);
+  
+  // slider data text
   textSize(30);
+  textStyle('normal');
   let text_x_offset = 20;
   let data_text_h = 30
-  textStyle('normal');
   text(temp + ' K', text_x_offset, 70);
   text(layers + ' layers', text_x_offset, 70 + data_text_h);
   text(thick + ' nm', text_x_offset, 70 + data_text_h*2);
   text(intensity + ' intensity', text_x_offset, 70 + data_text_h*3);
+
+  // slider label text
   textSize(20);
   textStyle('bold');
-  text('T', row_slider.x + 4, row_slider.y + 25);
-  text('d', col_slider.x + 4, col_slider.y + 25);
-  text('I', int_slider.x + 4, int_slider.y + 25);
+  text('T', row_slider.x, row_slider.y + 25);
+  text('d', col_slider.x, col_slider.y + 25);
+  text('I', int_slider.x+2, int_slider.y + 25);
 
-  // draw labels for dropdown menus
+  // dropdown menu text
   textSize(15);
   text('Material:', dropdown_flake.x - 65, dropdown_flake.y + 13);
   text('SiO2 thickness:', dropdown_sio2.x - 104, dropdown_sio2.y + 13);
 
-  // versioning
+  // versioning text
   textSize(20);
-  text(version, text_x_offset, 30);
+  text('Flake Sim ', text_x_offset, 30);
+  let text_width_name = textWidth('Flake Sim ');
+  version_link.position(text_x_offset + text_width_name, 12);
 }
+  
 
-// pretty self explanatory here
+// pretty self explanatory here -> this code is attrocious but I really don't know JS
 function setMatrices(flake_matr, sio2_matr) {
   if (flake_matr === 'graphite') {
     if (sio2_matr === '90 nm') {
