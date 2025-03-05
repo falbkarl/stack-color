@@ -13,7 +13,7 @@ let row_slider, col_slider, int_slider;
 let dropdown_flake;
 let dropdown_sio2;
 let thickness_max;
-let version = 'Flake Sim v1.0.0'
+let version = 'Flake Sim v1.2.0'
 let sidebar_width;
 
 function preload() {
@@ -74,39 +74,28 @@ function setup() {
   // start with temporary maxes at 2, to be reset in setMatrices
   // (i don't know a better way to solve this problem)
   // intensity slider changes intensity level
-  sidebar_width = 200;
 
   // Slider(min, max, init_val, step)
-  let slider_spacing = 50;
   row_slider = createSlider(0, 2, 0, 1);
-  row_slider.position(40, height - 120);
-  
   col_slider = createSlider(0, 2, 0, 1);
-  col_slider.position(40 + slider_spacing, height - 120);
-
   int_slider = createSlider(0, 50, 25, 1);
-  int_slider.position(40 + 2*slider_spacing, height - 120);
 
   setMatrices('graphite', '90 nm');
 
   row_slider.style('transform-origin', 'left top'); 
   row_slider.style('transform', 'rotate(-90deg)');
-  row_slider.style('width', '500px');
   row_slider.class('slider')
   
   col_slider.style('transform-origin', 'left top'); 
   col_slider.style('transform', 'rotate(-90deg)');
-  col_slider.style('width', '500px');
   col_slider.class('slider')
 
   int_slider.style('transform-origin', 'left top'); 
   int_slider.style('transform', 'rotate(-90deg)');
-  int_slider.style('width', '500px');
   int_slider.class('slider')
   
   // dropdown to select flakes
   dropdown_flake = createSelect();
-  dropdown_flake.position(col_slider.x + 25, row_slider.y + 50);
   dropdown_flake.option('graphite');
   dropdown_flake.option('h-BN');
   dropdown_flake.option('WSe2')
@@ -115,31 +104,19 @@ function setup() {
 
   // dropdown to select sio2 thickness
   dropdown_sio2 = createSelect();
-  dropdown_sio2.position(dropdown_flake.x, dropdown_flake.y + 25);
   dropdown_sio2.option('0 nm')
   dropdown_sio2.option('90 nm');
   dropdown_sio2.option('285 nm');
   dropdown_sio2.selected('90 nm');
   dropdown_sio2.changed(onDropdownChange);
-
-  // Create the shutdown button - CHATGPT generated pretty much
-  /*
-  let shutdownButton = createButton("Quit");
-  shutdownButton.position(int_slider.x + 10, 10);
-  shutdownButton.mousePressed(() => {
-    fetch('/shutdown')
-      .then(response => response.text())
-      .then(data => {
-        console.log(data); // Log the shutdown confirmation message
-        window.location.href = "about:blank";
-      })
-      .catch(err => console.error("Error shutting down:", err));
-  });
-  */
-
 }
 
 function draw() {
+  // some general params
+  textFont('Times New Roman');
+  // currently a dummy variable, does not affect elements in the sidebar
+  sidebar_width = 200;
+
   // handle flake size
   let flake_naive_w = 587;
   let flake_naive_h = 739;
@@ -158,6 +135,22 @@ function draw() {
   }
   let flake_x = sidebar_width + (windowWidth-sidebar_width)*flake_buffer_x;
   let flake_y = windowHeight*flake_buffer_y;
+
+  // slider positioning
+  let slider_spacing = 50;
+  row_slider.position(40, windowHeight - 120);
+  col_slider.position(40 + slider_spacing, windowHeight - 120);
+  int_slider.position(40 + 2*slider_spacing, windowHeight - 120);
+
+  let slider_height = (windowHeight - 120 - 180)
+
+  row_slider.style('width', `${slider_height}px`);
+  col_slider.style('width', `${slider_height}px`);
+  int_slider.style('width', `${slider_height}px`);
+
+  // dropdown positioning
+  dropdown_flake.position(col_slider.x + 25, row_slider.y + 50);
+  dropdown_sio2.position(dropdown_flake.x, dropdown_flake.y + 25);
 
   let row = row_slider.value();
   let col = col_slider.value();
@@ -224,15 +217,14 @@ function draw() {
   
   // draw labels for the sliders
   fill(0);
-  textFont('Times New Roman');
   textSize(30);
   let text_x_offset = 20;
-  let text_y_offset = 40;
+  let data_text_h = 30
   textStyle('normal');
-  text(temp + ' K', text_x_offset, col_slider.y - 650 + text_y_offset);
-  text(layers + ' layers', text_x_offset, col_slider.y - 650 + 30 + text_y_offset);
-  text(thick + ' nm', text_x_offset, col_slider.y - 650 + 60 + text_y_offset);
-  text(intensity + ' intensity', text_x_offset, col_slider.y - 650 + 90 + text_y_offset);
+  text(temp + ' K', text_x_offset, 70);
+  text(layers + ' layers', text_x_offset, 70 + data_text_h);
+  text(thick + ' nm', text_x_offset, 70 + data_text_h*2);
+  text(intensity + ' intensity', text_x_offset, 70 + data_text_h*3);
   textSize(20);
   textStyle('bold');
   text('T', row_slider.x + 4, row_slider.y + 25);
@@ -245,8 +237,8 @@ function draw() {
   text('SiO2 thickness:', dropdown_sio2.x - 104, dropdown_sio2.y + 13);
 
   // versioning
-  textSize(17);
-  text('Flake Sim v1.0.0', 10, 30);
+  textSize(20);
+  text(version, text_x_offset, 30);
 }
 
 // pretty self explanatory here
@@ -313,4 +305,3 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-// TODO prevent scrolling but allow slider movements
