@@ -8,12 +8,15 @@ let r_matrix_bn_285, g_matrix_bn_285, b_matrix_bn_285;
 let r_matrix_wse2_0, g_matrix_wse2_0, b_matrix_wse2_0;
 let r_matrix_wse2_90, g_matrix_wse2_90, b_matrix_wse2_90;
 let r_matrix_wse2_285, g_matrix_wse2_285, b_matrix_wse2_285;
+let r_matrix_mica_0, g_matrix_mica_0, b_matrix_mica_0;
+let r_matrix_mica_90, g_matrix_mica_90, b_matrix_mica_90;
+let r_matrix_mica_285, g_matrix_mica_285, b_matrix_mica_285;
 let r_matrix, g_matrix, b_matrix;
 let row_slider, col_slider, int_slider;
 let dropdown_flake;
 let dropdown_sio2;
 let thickness_max;
-let version = 'v1.3.0';
+let version = 'v1.4.0';
 let version_link;
 let sidebar_width;
 
@@ -60,6 +63,18 @@ function preload() {
   r_matrix_wse2_285 = loadTable('./data/r_flake_wse2_285.csv', 'csv', 'header=false');
   g_matrix_wse2_285 = loadTable('./data/g_flake_wse2_285.csv', 'csv', 'header=false');
   b_matrix_wse2_285 = loadTable('./data/b_flake_wse2_285.csv', 'csv', 'header=false');
+
+  r_matrix_mica_0 = loadTable('./data/r_flake_mica_0.csv', 'csv', 'header=false');
+  g_matrix_mica_0 = loadTable('./data/g_flake_mica_0.csv', 'csv', 'header=false');
+  b_matrix_mica_0 = loadTable('./data/b_flake_mica_0.csv', 'csv', 'header=false');
+
+  r_matrix_mica_90 = loadTable('./data/r_flake_mica_90.csv', 'csv', 'header=false');
+  g_matrix_mica_90 = loadTable('./data/g_flake_mica_90.csv', 'csv', 'header=false');
+  b_matrix_mica_90 = loadTable('./data/b_flake_mica_90.csv', 'csv', 'header=false');
+
+  r_matrix_mica_285 = loadTable('./data/r_flake_mica_285.csv', 'csv', 'header=false');
+  g_matrix_mica_285 = loadTable('./data/g_flake_mica_285.csv', 'csv', 'header=false');
+  b_matrix_mica_285 = loadTable('./data/b_flake_mica_285.csv', 'csv', 'header=false');
 }
 
 function sRGB_conv(value) {
@@ -93,6 +108,7 @@ function setup() {
   dropdown_flake.option('graphite');
   dropdown_flake.option('h-BN');
   dropdown_flake.option('WSe2')
+  dropdown_flake.option('muscovite');
   dropdown_flake.changed(onDropdownChange);
 
   // dropdown to select sio2 thickness
@@ -120,7 +136,7 @@ function setup() {
 
 function draw() {
   // currently a dummy variable, does not affect elements in the sidebar
-  sidebar_width = 200;
+  sidebar_width = 210;
 
   // handle dynamic flake sizing
   let flake_naive_w = 587;
@@ -180,7 +196,7 @@ function draw() {
 
   // set row & col slider to temp & thickness values
   // round thickness to nearest angstrom
-  let temp = map(row, 0, r_matrix.getRowCount()-1, 2500, 4500).toFixed(0);
+  let temp = map(row, 0, r_matrix.getRowCount()-1, 2000, 5500).toFixed(0);
   let layers = col;
   let thick = map(col, 0, r_matrix.getColumnCount()-1, 0, thickness_max).toFixed(3)
 
@@ -305,6 +321,21 @@ function setMatrices(flake_matr, sio2_matr) {
       b_matrix = b_matrix_wse2_0;
     }
     thickness_max = 300*0.6491;
+  } else if (flake_matr === 'muscovite') {
+    if (sio2_matr === '90 nm') {
+      r_matrix = r_matrix_mica_90;
+      g_matrix = g_matrix_mica_90;
+      b_matrix = b_matrix_mica_90;
+    } else if (sio2_matr === '285 nm') {
+      r_matrix = r_matrix_mica_285;
+      g_matrix = g_matrix_mica_285;
+      b_matrix = b_matrix_mica_285;
+    } else if (sio2_matr === '0 nm') {
+      r_matrix = r_matrix_mica_0;
+      g_matrix = g_matrix_mica_0;
+      b_matrix = b_matrix_mica_0;
+    }
+    thickness_max = 60*10.053;
   }
   // make sure we're resetting the max number of ticks for our sliders
   row_slider.attribute('max', r_matrix.getRowCount() - 1)
