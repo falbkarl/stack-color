@@ -7,6 +7,7 @@
 ## any tests I do
 test*.py
 tmp*.py
+*.ipynb
 
 # python files
 .pyc
