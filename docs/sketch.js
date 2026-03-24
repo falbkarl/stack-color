@@ -1,7 +1,7 @@
 // introduce some variables
 let csv_data = {};
 let materials = ["graphite", "h-BN", "WSe2"];
-let sio2_layers = ["0", "90", "100", "285"];
+let sio2_layers = ["0", "90", "100", "285", "300"];
 let color_options = ["r", "g", "b"];
 let r_matrix, g_matrix, b_matrix;
 let row_slider, col_slider, int_slider;
