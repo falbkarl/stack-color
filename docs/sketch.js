@@ -70,11 +70,12 @@ function setup() {
   dropdown_sio2.option('90 nm');
   dropdown_sio2.option('100 nm');
   dropdown_sio2.option('285 nm');
+  dropdown_sio2.option('300 nm');
   dropdown_sio2.changed(onDropdownChange);
 
   // initial conditions
-  dropdown_flake.selected('graphite');
-  dropdown_sio2.selected('90 nm');
+  dropdown_flake.selected('h-BN');
+  dropdown_sio2.selected('285 nm');
   setMatrices(dropdown_flake.value(), dropdown_sio2.value());
 
   // version link

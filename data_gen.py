@@ -3,7 +3,7 @@ import numpy as np
 from multiprocess import Pool
 import os
 
-sio2_thicknesses = (0, 90, 100, 285) #nm
+sio2_thicknesses = (0, 90, 100, 285, 300) #nm
 materials = {'graphite':('graphite', 150), 'hbn':('h-BN', 600), 'wse2':('WSe2', 300)} # material: (nice name, max_layers)
 
 def get_rgb(flake, layers, sio2, light_t):
