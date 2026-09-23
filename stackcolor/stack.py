@@ -3,7 +3,7 @@ import copy
 
 class Stack:
     '''
-    takes a list (ordered from top down) of stack materials, list of # of layers, and simulates the color
+    takes a list (ordered from top down) of stack materials, list of # of layers (just include thickness of air in [m]), and simulates the color
     '''
     def __init__(self, materials, thicknesses, sio2_thickness=90e-9, color_model='human', light_temp=3000, intensity=1):
         # parameters

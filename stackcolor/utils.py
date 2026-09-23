@@ -36,7 +36,7 @@ def interp_N(material):
 refr_dict = dict()
 for mat in MATERIALS:
     refr_dict[mat] = interp_N(mat)
-lattice_c_dict = {'graphite':0.335e-9, 'hbn':0.333e-9, 'wse2':0.6491e-9}
+lattice_c_dict = {'graphite':0.335e-9, 'hbn':0.333e-9, 'wse2':0.6491e-9, 'air':1}
 
 
 # black body spectrum
